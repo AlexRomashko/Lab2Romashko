@@ -43,13 +43,19 @@ public class MainFrame extends JFrame {
 
     // Группа радио-кнопок для обеспечения уникальности выделения в группе
     private ButtonGroup radioButtons = new ButtonGroup();
+    private ButtonGroup radioMemoryButtons = new ButtonGroup();
 
     // Контейнер для отображения радио-кнопок
     private Box hboxFormulaType = Box.createHorizontalBox();
+    private Box hBoxMemoryType = Box.createHorizontalBox();
+
     private int formulaId = 1;
+    private int memoryId = 1;
 
     // переменная для накопления результата
-    private Double sum = 0.0;
+    private Double mem1 = 0.0;
+    private Double mem2 = 0.0;
+    private Double mem3 = 0.0;
 
     // Формула №1 для рассчѐта
     public Double calculate1(Double x, Double y, Double z) {
@@ -60,7 +66,23 @@ public class MainFrame extends JFrame {
         return (Math.tan(pow(x,2))+sqrt(y))/(z*Math.log(x+y));
     }
 
-    // Вспомогательный метод для добавления кнопок на панель
+    // Вспомогательный метод для добавления кнопок памяти на панель
+    private void addMemoryRadioButton (String buttonName, final int memoryId)	{
+        JRadioButton button = new JRadioButton(buttonName);
+
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event)	{
+                MainFrame.this.memoryId = memoryId;
+                if (memoryId == 1)	memoryTextField.setText(mem1.toString());
+                if (memoryId == 2)	memoryTextField.setText(mem2.toString());
+                if (memoryId == 3)	memoryTextField.setText(mem3.toString());
+            }
+        });
+        radioMemoryButtons.add(button);
+        hBoxMemoryType.add(button);
+    }
+
+    // Вспомогательный метод для добавления кнопок формул на панель
     private void addRadioButton(String buttonName, final int formulaId) {
         JRadioButton button = new JRadioButton(buttonName);
         button.addActionListener(new ActionListener() {
@@ -148,10 +170,11 @@ public class MainFrame extends JFrame {
         JButton buttonMC = new JButton("MC");
         buttonMC.addActionListener(new ActionListener() {
 
-
             //функция при нажатие на кнопку МС
             public void actionPerformed(ActionEvent ev) {
-                sum = 0.0;
+                if(memoryId == 1) {mem1 = 0.0;}
+                if(memoryId == 2) {mem2 = 0.0;}
+                if(memoryId == 3) {mem3 = 0.0;}
                 memoryTextField.setText("0.0");
             }
         });
@@ -164,8 +187,11 @@ public class MainFrame extends JFrame {
             public void actionPerformed(ActionEvent ev) {
                 try {
                     Double result = Double.parseDouble(textFieldResult.getText());
-                    sum += result;
-                    memoryTextField.setText(sum.toString());
+
+                    if (memoryId == 1) {mem1 += result; memoryTextField.setText(mem1.toString());}
+                    if (memoryId == 2) {mem2 += result; memoryTextField.setText(mem2.toString());}
+                    if (memoryId == 3) {mem3 += result; memoryTextField.setText(mem3.toString());}
+
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(MainFrame.this,
                             "Ошибка в формате записи числа с плавающей точкой", "Ошибочный формат числа",
@@ -181,6 +207,14 @@ public class MainFrame extends JFrame {
         memory_result.add(Box.createHorizontalStrut(10));
         memory_result.add(buttonM_plus);
         memory_result.add(Box.createHorizontalGlue());
+
+        // создаём кнопки переменных
+        hBoxMemoryType.add(Box.createHorizontalGlue());
+        addMemoryRadioButton("Переменная 1",1);
+        addMemoryRadioButton("Переменная 2",2);
+        addMemoryRadioButton("Переменная 3",3);
+        radioMemoryButtons.setSelected(radioMemoryButtons.getElements().nextElement().getModel(), true);
+        hBoxMemoryType.add(Box.createHorizontalGlue());
 
         // Создаём кнопку "Вычислить"
         JButton buttonCalc = new JButton("Вычислить");
@@ -237,6 +271,7 @@ public class MainFrame extends JFrame {
         contentBox.add(Box.createVerticalGlue());
         contentBox.add(hboxVariables);
         contentBox.add(memory_result);
+        contentBox.add(hBoxMemoryType);
         contentBox.add(hboxResult);
         contentBox.add(hboxButtons);
 
