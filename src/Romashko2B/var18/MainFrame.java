@@ -39,6 +39,7 @@ public class MainFrame extends JFrame {
     // Текстовое поле для отображения результата,
 // как компонент, совместно используемый в различных методах
     private JTextField textFieldResult;
+    private JTextField memoryTextField;
 
     // Группа радио-кнопок для обеспечения уникальности выделения в группе
     private ButtonGroup radioButtons = new ButtonGroup();
@@ -46,6 +47,9 @@ public class MainFrame extends JFrame {
     // Контейнер для отображения радио-кнопок
     private Box hboxFormulaType = Box.createHorizontalBox();
     private int formulaId = 1;
+
+    // переменная для накопления результата
+    private Double sum = 0.0;
 
     // Формула №1 для рассчѐта
     public Double calculate1(Double x, Double y, Double z) {
@@ -73,10 +77,12 @@ public class MainFrame extends JFrame {
         super("Вычисление формулы");
         setSize(WIDTH, HEIGHT);
         Toolkit kit = Toolkit.getDefaultToolkit();
+
 // Отцентрировать окно приложения на экране
         setLocation((kit.getScreenSize().width - WIDTH)/2,
                 (kit.getScreenSize().height - HEIGHT)/2);
 
+        // создаём кнопки "Формула 1" и "Формула 2"
         hboxFormulaType.add(Box.createHorizontalGlue());
         addRadioButton("Формула 1", 1);
         addRadioButton("Формула 2", 2);
@@ -99,6 +105,7 @@ public class MainFrame extends JFrame {
         textFieldZ = new JTextField("0", 10);
         textFieldZ.setMaximumSize(textFieldZ.getPreferredSize());
 
+        //устанавливаем и расставляем поля для переменных и границы
         Box hboxVariables = Box.createHorizontalBox();
         hboxVariables.setBorder(
                 BorderFactory.createLineBorder(Color.RED));
@@ -119,7 +126,7 @@ public class MainFrame extends JFrame {
 // Создать область для вывода результата
         JLabel labelForResult = new JLabel("Результат:");
 
-//labelResult = new JLabel("0");
+        //создаём и устанавливаем поле результата
         textFieldResult = new JTextField("0", 10);
         textFieldResult.setMaximumSize(
                 textFieldResult.getPreferredSize());
@@ -131,9 +138,55 @@ public class MainFrame extends JFrame {
         hboxResult.add(Box.createHorizontalGlue());
         hboxResult.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 
-// Создать область для кнопок
+        //создаём поле памяти накопления сумм
+        Box memory_result=Box.createHorizontalBox();
+        memory_result.add(Box.createHorizontalGlue());
+        memoryTextField = new JTextField("0.0", 15);
+        memoryTextField.setMaximumSize(memoryTextField.getPreferredSize());
+
+        //создаём кнопку МС
+        JButton buttonMC = new JButton("MC");
+        buttonMC.addActionListener(new ActionListener() {
+
+
+            //функция при нажатие на кнопку МС
+            public void actionPerformed(ActionEvent ev) {
+                sum = 0.0;
+                memoryTextField.setText("0.0");
+            }
+        });
+
+        //создаём кнопку М+
+        JButton buttonM_plus = new JButton("M+");
+        buttonM_plus.addActionListener(new ActionListener() {
+
+            //функция при нажатии на кнопку М+
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    Double result = Double.parseDouble(textFieldResult.getText());
+                    sum += result;
+                    memoryTextField.setText(sum.toString());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(MainFrame.this,
+                            "Ошибка в формате записи числа с плавающей точкой", "Ошибочный формат числа",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        //устанавливаем кнопки МС и М+ и поле накопления сумм
+        memory_result.add(buttonMC);
+        memory_result.add(Box.createHorizontalStrut(10));
+        memory_result.add(memoryTextField);
+        memory_result.add(Box.createHorizontalStrut(10));
+        memory_result.add(buttonM_plus);
+        memory_result.add(Box.createHorizontalGlue());
+
+        // Создаём кнопку "Вычислить"
         JButton buttonCalc = new JButton("Вычислить");
         buttonCalc.addActionListener(new ActionListener() {
+
+            //функция при нажати на кнопку "Вычислить"
             public void actionPerformed(ActionEvent ev) {
                 try {
                     Double x = Double.parseDouble(textFieldX.getText());
@@ -153,8 +206,11 @@ public class MainFrame extends JFrame {
             }
         });
 
+        // Создаём кнопку "Очистить поля"
         JButton buttonReset = new JButton("Очистить поля");
         buttonReset.addActionListener(new ActionListener() {
+
+            //функция при нажати на кнопку "Очистить поля"
             public void actionPerformed(ActionEvent ev) {
                 textFieldX.setText("0");
                 textFieldY.setText("0");
@@ -163,6 +219,7 @@ public class MainFrame extends JFrame {
             }
         });
 
+        //устанавливаем кнопки "Вычислить" и "Очистить поля"
         Box hboxButtons = Box.createHorizontalBox();
         hboxButtons.add(Box.createHorizontalGlue());
         hboxButtons.add(buttonCalc);
@@ -174,12 +231,15 @@ public class MainFrame extends JFrame {
 
 // Связать области воедино в компоновке BoxLayout
         Box contentBox = Box.createVerticalBox();
+
         contentBox.add(Box.createVerticalGlue());
         contentBox.add(hboxFormulaType);
+        contentBox.add(Box.createVerticalGlue());
         contentBox.add(hboxVariables);
+        contentBox.add(memory_result);
         contentBox.add(hboxResult);
         contentBox.add(hboxButtons);
-        contentBox.add(Box.createVerticalGlue());
+
         getContentPane().add(contentBox, BorderLayout.CENTER);
     }
     // Главный метод класса
